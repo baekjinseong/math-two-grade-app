@@ -12,6 +12,7 @@ func = st.sidebar.selectbox("삼각함수 선택", ["sin", "cos", "tan"])
 
 a = st.sidebar.slider("진폭 (a)", -5.0, 5.0, 1.0, 0.1)
 b = st.sidebar.slider("주기 계수 (b)", 0.1, 5.0, 1.0, 0.1)
+d = st.sidebar.slider("수평 이동 (d)", -5.0, 5.0, 0.0, 0.1)
 c = st.sidebar.slider("수직 이동 (c)", -5.0, 5.0, 0.0, 0.1)
 
 # x 범위 (tan의 경우 기본 범위를 조절)
@@ -29,20 +30,22 @@ x_max = st.sidebar.slider("x 최대값", 0.0, 10.0, default_max)
 x = np.linspace(x_min, x_max, 1000)
 
 # 함수 계산
+x_shift = x - d
 if func == "sin":
-    y = a * np.sin(b * x) + c
+    y = a * np.sin(b * x_shift) + c
 elif func == "cos":
-    y = a * np.cos(b * x) + c
+    y = a * np.cos(b * x_shift) + c
 elif func == "tan":
-    raw_y = a * np.tan(b * x) + c
-    mask = np.abs(np.cos(b * x)) < 0.02
+    raw_y = a * np.tan(b * x_shift) + c
+    mask = np.abs(np.cos(b * x_shift)) < 0.02
     y = np.ma.array(raw_y, mask=mask)
 
 # 그래프 그리기
 fig, ax = plt.subplots()
 ax.plot(x, y)
 ax.set_xlabel("x")
-ax.set_ylabel(f"y = {a} * {func}({b} * x) + {c}")
+shift_inner = f"(x - {d:.2f})" if d >= 0 else f"(x + {abs(d):.2f})"
+ax.set_ylabel(f"y = {a} * {func}({b} * {shift_inner}) + {c}")
 ax.grid(True)
 ax.axhline(0, color='black', linewidth=0.5)
 ax.axvline(0, color='black', linewidth=0.5)
@@ -93,12 +96,13 @@ st.pyplot(fig)
 
 # 설명
 st.write("### 그래프 설명")
-st.write(f"선택된 함수: y = {a} * {func}({b} * x) + {c}")
+st.write(f"선택된 함수: y = {a} * {func}({b} * {shift_inner}) + {c}")
 st.write("- **진폭 (a)**: 그래프의 높이 (최댓값 - 최솟값)/2")
 if func in ["sin", "cos"]:
     st.write(f"- **주기 계수 (b)**: 주기를 조절 (현재 주기: {2*np.pi/b:.2f})")
 else:
     st.write(f"- **주기 계수 (b)**: 주기를 조절 (현재 주기: {np.pi/b:.2f})")
+st.write("- **수평 이동 (d)**: 그래프를 왼쪽/오른쪽으로 이동")
 st.write("- **수직 이동 (c)**: 그래프를 위아래로 이동")
 st.write("- **주기 표시**: 빨간 점선으로 주기 경계를 표시")
 st.write("- **교점 표시**: 파란 점으로 y=0과의 교점을 표시")
