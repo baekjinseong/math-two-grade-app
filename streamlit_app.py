@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
+from fractions import Fraction
 
 st.title("삼각함수 그래프 시각화")
 st.write("2022개정 교육과정 수학 수업용 삼각함수 그래프 도구")
@@ -50,16 +51,29 @@ ax.grid(True)
 ax.axhline(0, color='black', linewidth=0.5)
 ax.axvline(0, color='black', linewidth=0.5)
 
-# 주기 표시 (수직선과 눈금)
+# π 단위 눈금 레이블 함수
+def format_pi_tick(value):
+    frac = Fraction(value / np.pi).limit_denominator(8)
+    if frac.numerator == 0:
+        return "0"
+    sign = "-" if frac.numerator * frac.denominator < 0 else ""
+    num = abs(frac.numerator)
+    den = frac.denominator
+    if den == 1:
+        return f"{sign}{'' if num == 1 else num}π"
+    return f"{sign}{num}π/{den}"
+
+# 주기 표시 (수직선과 π 눈금)
 if func in ["sin", "cos"]:
     period = 2 * np.pi / b
 else:  # tan
     period = np.pi / b
 
-xticks = np.arange(np.ceil(x_min / period) * period, x_max + period, period)
+tick_spacing = np.pi / 2
+xticks = np.arange(np.ceil(x_min / tick_spacing) * tick_spacing, x_max + tick_spacing / 2, tick_spacing)
 ax.set_xticks(xticks)
-ax.set_xticklabels([f"{tick/period:.1f}T" for tick in xticks])  # T는 주기 단위
-for tick in xticks:
+ax.set_xticklabels([format_pi_tick(t) for t in xticks])
+for tick in np.arange(np.ceil(x_min / period) * period, x_max + period / 2, period):
     ax.axvline(tick, color='red', linestyle='--', alpha=0.5, linewidth=1)
 
 # y=0과의 교점 표시
@@ -99,9 +113,13 @@ st.write("### 그래프 설명")
 st.write(f"선택된 함수: y = {a} * {func}({b} * {shift_inner}) + {c}")
 st.write("- **진폭 (a)**: 그래프의 높이 (최댓값 - 최솟값)/2")
 if func in ["sin", "cos"]:
-    st.write(f"- **주기 계수 (b)**: 주기를 조절 (현재 주기: {2*np.pi/b:.2f})")
+    st.write("- **주기 계수 (b)**: 주기를 조절")
+    st.latex(r"\text{현재 주기} = \frac{2\pi}{b}")
+    st.write(f"(현재 b={b:.1f} 이므로 약 {2*np.pi/b:.2f})")
 else:
-    st.write(f"- **주기 계수 (b)**: 주기를 조절 (현재 주기: {np.pi/b:.2f})")
+    st.write("- **주기 계수 (b)**: 주기를 조절")
+    st.latex(r"\text{현재 주기} = \frac{\pi}{b}")
+    st.write(f"(현재 b={b:.1f} 이므로 약 {np.pi/b:.2f})")
 st.write("- **수평 이동 (d)**: 그래프를 왼쪽/오른쪽으로 이동")
 st.write("- **수직 이동 (c)**: 그래프를 위아래로 이동")
 st.write("- **주기 표시**: 빨간 점선으로 주기 경계를 표시")
