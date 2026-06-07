@@ -38,7 +38,6 @@ if page == "기본형":
     ax_circle.scatter([cos_val], [sin_val], color='red', s=70, zorder=5)
     ax_circle.plot([0, cos_val], [sin_val, sin_val], color='red', linestyle='--', linewidth=1)
     ax_circle.plot([cos_val, cos_val], [0, sin_val], color='red', linestyle='--', linewidth=1)
-    ax_circle.text(0.05, 0.9, r'$	heta$', fontsize=16, color='blue')
     ax_circle.set_xlim(-1.2, 1.2)
     ax_circle.set_ylim(-1.2, 1.2)
     ax_circle.set_aspect('equal', 'box')
